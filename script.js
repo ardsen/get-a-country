@@ -9,14 +9,14 @@ let latitude;
 let longitude;
 const apiKey = '121821921230023e15872933x57060'
 function success(position) {
-    ({ latitude, longitude } = position.coords)
-    fetchLocation(latitude, longitude)
+  ({ latitude, longitude } = position.coords)
+  fetchLocation(latitude, longitude)
 }
 
 
 function getCountry() { navigator.geolocation.getCurrentPosition(success) }
 const renderCountry = function (data) {
-    const html = `<div class="country-wrapper">
+  const html = `<div class="country-wrapper">
         <div class="flag-name">
           <img src=${data.flag} alt="" />
           <p>${data.name}</p>
@@ -53,87 +53,88 @@ const renderCountry = function (data) {
           </div>
         </div>
       </div>`
-    main.insertAdjacentHTML("afterbegin", html)
+  main.insertAdjacentHTML("afterbegin", html)
 }
 const renderNeighbours = function (neighbours, ...countries) {
-    if (!countries) neighbours.insertAdjacentHTML("afterbegin", `
+  if (!countries) neighbours.insertAdjacentHTML("afterbegin", `
         <div class="neighbour">
             <p>The country has no neighbours</p>
         </div>`)
-    countries.forEach(country => neighbours.insertAdjacentHTML("afterbegin", `
+  countries.forEach(country => neighbours.insertAdjacentHTML("afterbegin", `
             <div class="neighbour">
               <img src=${country.flag} alt="" />
               <p>${country.name}</p>
             </div>`))
 }
 const renderError = function (neighbours, message) {
-    neighbours.insertAdjacentHTML("afterbegin",
-        `
+  neighbours.insertAdjacentHTML("afterbegin",
+    `
           <p class="no-neighbour">${message}</p>
        `)
 }
 const fetchLocation = function (latitude, longitude) {
-    fetch(`https://geocode.xyz/${latitude},${longitude}?geoit=json&auth=${apiKey}`)
-        .then(response => {
-            if (!response.ok) throw new Error(`Problem with geocoding, Try again! ${response.status}`)
-            return response.json()
-        })
-        .then(data => {
-            const myCountry = data.country.toLowerCase()
-            return fetch(`https://restcountries.com/v2/name/${myCountry}`)
-        })
-        .then(response => {
-            if (!response.ok) throw new Error(`Problem with restcountries api, Try again! ${response.status}`)
-            return response.json()
-        })
-        .then(data => {
-            renderCountry(data[0]);
-            return fetch(`https://restcountries.com/v2/alpha?codes=${data[0].borders.join(',')}`)
-        })
-        .then(response => {
-            if (!response.ok) throw new Error(`Problem with restcountries api, Try again! ${response.status}`)
-            return response.json()
-        })
-        .then(data => {
-            const neighbours = document.querySelector('.neigbours');
-            renderNeighbours(neighbours, ...data)
-        })
-        .catch(err => {
-            const neighbours = document.querySelector('.neigbours');
-            renderError(neighbours, err.message);
-            console.error(err.message)
-        })
+  fetch(`https://geocode.xyz/${latitude},${longitude}?geoit=json&auth=${apiKey}`)
+    .then(response => {
+      if (!response.ok) throw new Error(`Problem with geocoding, Try again! ${response.status}`)
+      return response.json()
+    })
+    .then(data => {
+      if (!data.country) throw new Error(`Problem with geocode API, Try again after 2 minutes! ${response.status}`)
+      const myCountry = data.country.toLowerCase()
+      return fetch(`https://restcountries.com/v2/name/${myCountry}`)
+    })
+    .then(response => {
+      if (!response.ok) throw new Error(`Problem with restcountries api, Try again! ${response.status}`)
+      return response.json()
+    })
+    .then(data => {
+      renderCountry(data[0]);
+      return fetch(`https://restcountries.com/v2/alpha?codes=${data[0].borders.join(',')}`)
+    })
+    .then(response => {
+      if (!response.ok) throw new Error(`Problem with restcountries api, Try again! ${response.status}`)
+      return response.json()
+    })
+    .then(data => {
+      const neighbours = document.querySelector('.neigbours');
+      renderNeighbours(neighbours, ...data)
+    })
+    .catch(err => {
+      const neighbours = document.querySelector('.neigbours');
+      renderError(neighbours, err.message);
+      console.error(err.message)
+    })
 
 }
 
 const fetchRandomCountry = function () {
-    fetch(`https://restcountries.com/v2/all`).then(response => response.json()).then(data => {
-        let randomNumber = Math.floor(Math.random() * 249);
-        const arr = data.map(country => country.name)
-        return fetch(`https://restcountries.com/v2/name/${arr[randomNumber]}?fullText=true`)
+  fetch(`https://restcountries.com/v2/all`).then(response => response.json()).then(data => {
+    let randomNumber = Math.floor(Math.random() * 249);
+    const arr = data.map(country => country.name)
+    return fetch(`https://restcountries.com/v2/name/${arr[randomNumber]}?fullText=true`)
+  })
+    .then(response => {
+      if (!response.ok) throw new Error(`Problem with restcountries api, Try again! ${response.status}`);
+      return response.json()
     })
-        .then(response => {
-            if (!response.ok) throw new Error(`Problem with restcountries api, Try again! ${response.status}`);
-            return response.json()
-        })
-        .then(data => {
-            renderCountry(data[0]);
-            if (!data[0].borders) throw new Error('The country has no neighbours')
-            return fetch(`https://restcountries.com/v2/alpha?codes=${data[0].borders.join(',')}`)
-        })
-        .then(response => {
-            if (!response.ok) throw new Error(`Problem with restcountries api, Try again! ${response.status}`);
-            return response.json()
-        })
-        .then(data => {
-            const neighbours = document.querySelector('.neigbours');
-            renderNeighbours(neighbours, ...data)
-        })
-        .catch(err => {
-            const neighbours = document.querySelector('.neigbours');
-            renderError(neighbours, err.message)
-            console.error(err.message)
-        })
+    .then(data => {
+      renderCountry(data[0]);
+      if (!data[0].borders) throw new Error('The country has no neighbours')
+      return fetch(`https://restcountries.com/v2/alpha?codes=${data[0].borders.join(',')}`)
+    })
+    .then(response => {
+      if (!response.ok) throw new Error(`Problem with restcountries api, Try again! ${response.status}`);
+      return response.json()
+    })
+    .then(data => {
+      const neighbours = document.querySelector('.neigbours');
+      renderNeighbours(neighbours, ...data)
+    })
+    .catch(err => {
+      const neighbours = document.querySelector('.neigbours');
+      renderError(neighbours, err.message)
+      console.error(err.message)
+    })
 }
 
 btnLocation.addEventListener('click', getCountry)
