@@ -79,7 +79,7 @@ const fetchLocation = function (latitude, longitude) {
       return response.json()
     })
     .then(data => {
-      if (!data.country) throw new Error(`Problem with geocode API, Try again after 2 minutes! ${response.status}`)
+      if (!data.country) throw new Error(`Problem with geocode API, Try again after 2 minutes!`)
       const myCountry = data.country.toLowerCase()
       return fetch(`https://restcountries.com/v2/name/${myCountry}`)
     })
