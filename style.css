@@ -142,3 +142,72 @@ main {
   color: brown;
   margin-top: 25px;
 }
+@media screen and (max-width: 1200px) {
+  .country-wrapper {
+    width: 100%;
+  }
+}
+@media screen and (max-width: 900px) {
+  header button {
+    font-size: 16px;
+  }
+  .country-wrapper {
+    height: 60vh;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+  .flag-name {
+    height: auto;
+  }
+}
+
+@media screen and (max-width: 720px) {
+  * {
+    font-size: small;
+  }
+  .flag-name {
+    width: 30%;
+  }
+  .neighbour {
+    width: 70px;
+    height: 45px;
+  }
+  .neigbours {
+    flex-wrap: wrap;
+  }
+  .neighbour p {
+    display: none;
+  }
+  .info-neighbours {
+    gap: 50px;
+  }
+  .info-container {
+    gap: 20px;
+  }
+  .btn-container {
+    gap: 5px;
+  }
+  header button {
+    font-size: 14px;
+    padding: 0.1rem 0.1rem;
+  }
+  .country-wrapper {
+    height: 80vh;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+}
+
+@media screen and (max-height: 720px) {
+  .country-wrapper {
+    height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .info-neighbours {
+    gap: 20px;
+  }
+}
