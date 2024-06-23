@@ -72,6 +72,9 @@ const renderError = function (neighbours, message) {
           <p class="no-neighbour">${message}</p>
        `)
 }
+
+// ------------ fetch/then method --------------
+/*
 const fetchLocation = function (latitude, longitude) {
   fetch(`https://geocode.xyz/${latitude},${longitude}?geoit=json&auth=${apiKey}`)
     .then(response => {
@@ -136,6 +139,58 @@ const fetchRandomCountry = function () {
       console.error(err.message)
     })
 }
+*/
+//  --------------ES6 async/await method------------------
+const fetchLocation = async function (latitude, longitude) {
+  try {
+    const location = await fetch(`https://geocode.xyz/${latitude},${longitude}?geoit=json&auth=${apiKey}`)
+    if (!location.ok) throw new Error(`Problem with geocoding, Try again! ${location.status}`)
+    const locationData = await location.json()
+    if (!locationData.country) throw new Error(`Problem with geocode API, Try again 2 minutes later!`)
+    const myCountry = locationData.country.toLowerCase()
+    const country = await fetch(`https://restcountries.com/v2/name/${myCountry}`)
+    if (!country.ok) throw new Error(`Problem with restcountries api, Try again! ${country.status}`)
+    const [countryData] = await country.json()
+    console.log(countryData)
+    renderCountry(countryData)
+    const neighbours = await fetch(`https://restcountries.com/v2/alpha?codes=${countryData.borders.join(',')}`)
+    if (!neighbours.ok) throw new Error(`Problem with restcountries api, Try again! ${neighbours.status}`)
+    const neighboursData = await neighbours.json()
+    const neighboursElement = document.querySelector('.neigbours')
+    renderNeighbours(neighboursElement, ...neighboursData)
+  } catch (err) {
+    const neighboursElement = document.querySelector('.neigbours')
+    renderError(neighboursElement, err.message)
+    console.error(err.message)
+  }
+}
+
+
+const fetchRandomCountry = async function () {
+  try {
+    const allCountries = await fetch(`https://restcountries.com/v2/all`)
+    if (!allCountries.ok) throw new Error(`Problem with restcountries api, Try again! ${allCountries.status}`)
+    const allCountriesData = await allCountries.json()
+    const arr = allCountriesData.map(country => country.name)
+    let randomNumber = Math.floor(Math.random() * 249)
+    const country = await fetch(`https://restcountries.com/v2/name/${arr[randomNumber]}?fullText=true`)
+    const [countryData] = await country.json()
+    renderCountry(countryData)
+    if (!countryData.borders) throw new Error('The country has no neighbours')
+    const neighbours = await fetch(`https://restcountries.com/v2/alpha?codes=${countryData.borders.join(',')}`)
+    if (!neighbours.ok) throw new Error(`Problem with restcountries api, Try again! ${neighbours.status}`);
+    const neighboursData = await neighbours.json()
+    const neighboursElement = document.querySelector('.neigbours')
+    renderNeighbours(neighboursElement, ...neighboursData)
+
+  } catch (err) {
+    const neighboursElement = document.querySelector('.neigbours')
+    renderError(neighboursElement, err.message)
+    console.error(err.message)
+  }
+}
+
+
 
 btnLocation.addEventListener('click', getCountry)
 btnRandom.addEventListener('click', fetchRandomCountry)
